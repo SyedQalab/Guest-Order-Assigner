@@ -16,3 +16,33 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/**
+ * Attach an order to a user if it’s still a guest (user_id = 0).
+ */
+/**
+ * Attach this order to $user if it's still marked as a guest.
+ *
+ * @param WC_Order $order
+ * @param WP_User  $user
+ */
+function goa_attach_if_guest( WC_Order $order, WP_User $user ): void {
+    // Only run on pure guest orders
+    if ( 0 !== (int) $order->get_user_id() ) {
+        return;
+    }
+
+    // Bail if there’s no billing email
+    $email = sanitize_email( $order->get_billing_email() );
+    if ( ! $email ) {
+        return;
+    }
+    // Confirm the passed-in user matches the billing email
+    if ( strtolower( $user->user_email ) !== strtolower( $email ) ) {
+        return;
+    }
+
+    // All checks passed — assign & persist
+    $order->set_customer_id( $user->ID );
+    $order->save();
+}
