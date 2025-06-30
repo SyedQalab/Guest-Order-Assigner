@@ -96,3 +96,21 @@ function attach_guest_order_to_existing_user( int $order_id ): void {
     $order->set_customer_id( $user->ID );
     $order->save();
 }
+
+/**
+ * Also back-fill as soon as an account is created via checkout.
+ */
+add_action( 'woocommerce_created_customer', function ( $customer_id ) {
+    if ( $user = get_user_by( 'ID', $customer_id ) ) {
+        goa_backfill_guest_orders( $user );
+    }
+}, 20, 1 );
+
+/**
+ * And again on any user login—just in case.
+ */
+add_action( 'wp_login', function ( $login, $user ) {
+    if ( $user instanceof WP_User ) {
+        goa_backfill_guest_orders( $user );
+    }
+}, 20, 2 );
