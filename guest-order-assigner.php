@@ -46,3 +46,23 @@ function goa_attach_if_guest( WC_Order $order, WP_User $user ): void {
     $order->set_customer_id( $user->ID );
     $order->save();
 }
+
+/**
+ * Back-fill all past guest orders sharing this user’s billing email.
+ */
+function goa_backfill_guest_orders( WP_User $user ): void {
+    $email = sanitize_email( $user->user_email );
+    if ( ! $email ) {
+        return;
+    }
+
+    $orders = wc_get_orders( [
+        'limit'         => -1,
+        'status'        => array_keys( wc_get_order_statuses() ),
+        'billing_email' => $email,
+    ] );
+
+    foreach ( $orders as $order ) {
+        goa_attach_if_guest( $order, $user );
+    }
+}
