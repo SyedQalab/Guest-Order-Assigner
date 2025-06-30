@@ -66,3 +66,33 @@ function goa_backfill_guest_orders( WP_User $user ): void {
         goa_attach_if_guest( $order, $user );
     }
 }
+
+/**
+ * Assign the current order (and then back-fill) on every checkout—
+ * this covers:
+ *   • Pure guest checkouts (even if the user already exists)
+ *   • Logged-in checkouts
+ *   • “Create account during checkout” checkouts
+ */
+// Fires for every new order, including guests
+add_action( 'woocommerce_new_order', 'attach_guest_order_to_existing_user', 20, 1 );
+function attach_guest_order_to_existing_user( int $order_id ): void {
+
+    $order = wc_get_order( $order_id );
+    if ( ! $order || (int) $order->get_user_id() !== 0 ) {
+        return;
+    }
+
+    $billing_email = sanitize_email( $order->get_billing_email() );
+    if ( ! $billing_email ) {
+        return;
+    }
+
+    $user = get_user_by( 'email', $billing_email );
+    if ( ! $user ) {
+        return;
+    }
+
+    $order->set_customer_id( $user->ID );
+    $order->save();
+}
