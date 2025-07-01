@@ -179,6 +179,96 @@ add_filter( 'plugin_row_meta', function( array $links, string $file ) {
 }, 10, 2 );
 
 /**
+ * 2) When that URL is hit, WP will fire admin_action_goa_settings.
+ *    We catch it, render our page, and then exit.
+ */
+add_action( 'admin_action_goa_settings', 'goa_render_settings_page' );
+function goa_render_settings_page() {
+    // Permission check
+    if ( ! current_user_can( 'manage_woocommerce' ) ) {
+        wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'guest-order-assigner' ) );
+    }
+
+    // Load the standard WP admin header
+    require_once ABSPATH . 'wp-admin/admin-header.php';
+
+    // Print out any queued settings errors/notices
+    settings_errors( 'goa_status' );
+    ?>
+
+<div class="wrap">
+        <h1 style="display: none;"><?php esc_html_e( 'Guest Order Assigner Settings', 'guest-order-assigner' ); ?></h1>
+        
+        <div class="goa-settings-container">
+            <!-- Header Section -->
+            <div class="goa-admin-header">
+                <div class="goa-header">
+                    <h1><?php esc_html_e( 'Guest Order Assigner', 'guest-order-assigner' ); ?></h1>
+                    <p class="subtitle"><?php esc_html_e( 'Streamline your WooCommerce order management', 'guest-order-assigner' ); ?></p>
+                </div>
+            </div>
+
+            <div class="goa-content">
+                <!-- Status Card -->
+                <div class="goa-status-card">
+                    <div class="goa-status-icon">
+                        ✓
+                    </div>
+                    <div class="goa-status-text">
+                        <h3><?php esc_html_e( 'Plugin Active & Working', 'guest-order-assigner' ); ?></h3>
+                        <p><?php esc_html_e( 'Since ', 'guest-order-assigner' ); ?><span class="plugin-name"><?php esc_html_e( 'Guest Order Assigner', 'guest-order-assigner' ); ?></span><?php esc_html_e( ' is already active. All existing guest orders have already been attached to their matching user accounts, and any future guest checkouts will continue to be automatically linked based on billing email.', 'guest-order-assigner' ); ?></p>
+                    </div>
+                </div>
+
+                <!-- Features Grid -->
+                <div class="goa-features-grid">
+                    <div class="goa-feature-card">
+                        <div class="goa-feature-icon">
+                            🔄
+                        </div>
+                        <h4><?php esc_html_e( 'Automatic Order Assignment', 'guest-order-assigner' ); ?></h4>
+                        <p><?php esc_html_e( 'Seamlessly connects guest orders to customer accounts when they register or login, based on matching email addresses.', 'guest-order-assigner' ); ?></p>
+                    </div>
+
+                    <div class="goa-feature-card">
+                        <div class="goa-feature-icon">
+                            📋
+                        </div>
+                        <h4><?php esc_html_e( 'Historical Order Recovery', 'guest-order-assigner' ); ?></h4>
+                        <p><?php esc_html_e( 'Automatically back-fills historic guest orders when customers create accounts, ensuring complete order history.', 'guest-order-assigner' ); ?></p>
+                    </div>
+
+                    <div class="goa-feature-card">
+                        <div class="goa-feature-icon">
+                            ⚡
+                        </div>
+                        <h4><?php esc_html_e( 'Real-time Processing', 'guest-order-assigner' ); ?></h4>
+                        <p><?php esc_html_e( 'Orders are processed and assigned instantly without any manual intervention or delays.', 'guest-order-assigner' ); ?></p>
+                    </div>
+
+                    <div class="goa-feature-card">
+                        <div class="goa-feature-icon">
+                            🛡️
+                        </div>
+                        <h4><?php esc_html_e( 'Secure & Reliable', 'guest-order-assigner' ); ?></h4>
+                        <p><?php esc_html_e( 'Built with WordPress and WooCommerce best practices, ensuring data integrity and security.', 'guest-order-assigner' ); ?></p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    
+    <?php
+    // Load the standard WP admin footer
+    require_once ABSPATH . 'wp-admin/admin-footer.php';
+
+    // Always exit to prevent WP loading anything else
+    exit;
+}
+
+/**
  * 1) Register a Settings page under Settings → Guest Order Assigner
  */
 add_action( 'admin_menu', 'goa_register_settings_page' );
