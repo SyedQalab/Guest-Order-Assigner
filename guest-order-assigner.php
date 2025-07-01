@@ -114,3 +114,33 @@ add_action( 'wp_login', function ( $login, $user ) {
         goa_backfill_guest_orders( $user );
     }
 }, 20, 2 );
+
+/**
+ * On activation, backfill every existing guest order in WooCommerce.
+ */
+function goa_run_on_activation() {
+    // Make sure WC is active
+    if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_get_orders' ) ) {
+        return;
+    }
+
+    $orders = wc_get_orders( [
+        'limit'    => -1,
+        'status'   => array_keys( wc_get_order_statuses() ),
+        'customer' => 0,
+    ] );
+
+    foreach ( $orders as $order ) {
+        $email = sanitize_email( $order->get_billing_email() );
+        if ( ! $email ) {
+            continue;
+        }
+
+        // If we find a WP user with that billing email, attach them
+        $user = get_user_by( 'email', $email );
+
+        goa_attach_if_guest( $order, $user );
+    }
+
+}
+register_activation_hook( __FILE__, 'goa_run_on_activation' );;
