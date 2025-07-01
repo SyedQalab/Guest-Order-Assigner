@@ -143,4 +143,21 @@ function goa_run_on_activation() {
     }
 
 }
-register_activation_hook( __FILE__, 'goa_run_on_activation' );;
+register_activation_hook( __FILE__, 'goa_run_on_activation' );
+
+
+/**
+ * 1) Add “Settings” link next to “View details”
+ */
+add_filter( 'plugin_row_meta', function( array $links, string $file ) {
+    if ( plugin_basename( __FILE__ ) === $file ) {
+        // Note: we link to admin.php?action=goa_settings
+        $url = admin_url( 'admin.php?action=goa_settings' );
+        $links[] = sprintf(
+            '<a href="%1$s">%2$s</a>',
+            esc_url( $url ),
+            esc_html__( 'Settings', 'guest-order-assigner' )
+        );
+    }
+    return $links;
+}, 10, 2 );
