@@ -18,6 +18,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Enqueue our admin CSS only on the GOA settings page.
+ */
+add_action( 'admin_enqueue_scripts', 'goa_enqueue_admin_assets' );
+function goa_enqueue_admin_assets( string $hook_suffix ) {
+    // Only enqueue when our custom action=goa_settings page is being displayed
+    if ( isset( $_GET['action'] ) && $_GET['action'] === 'goa_settings' ) {
+        wp_enqueue_style(
+            'goa-admin-css',
+            plugin_dir_url( __FILE__ ) . 'assets/css/goa-admin.css',
+            [],    // no dependencies
+            '1.0.0'
+        );
+    }
+}
+
+/**
  * Attach an order to a user if it’s still a guest (user_id = 0).
  */
 /**
@@ -143,4 +159,47 @@ function goa_run_on_activation() {
     }
 
 }
-register_activation_hook( __FILE__, 'goa_run_on_activation' );;
+register_activation_hook( __FILE__, 'goa_run_on_activation' );
+
+
+/**
+ * 1) Add “Settings” link next to “View details”
+ */
+add_filter( 'plugin_row_meta', function( array $links, string $file ) {
+    if ( plugin_basename( __FILE__ ) === $file ) {
+        // Note: we link to admin.php?action=goa_settings
+        $url = admin_url( 'admin.php?action=goa_settings' );
+        $links[] = sprintf(
+            '<a href="%1$s">%2$s</a>',
+            esc_url( $url ),
+            esc_html__( 'Settings', 'guest-order-assigner' )
+        );
+    }
+    return $links;
+}, 10, 2 );
+
+/**
+ * 1) Register a Settings page under Settings → Guest Order Assigner
+ */
+add_action( 'admin_menu', 'goa_register_settings_page' );
+function goa_register_settings_page() {
+    // Build the full dynamic URL
+    $settings_action_url = admin_url( 'admin.php?action=goa_settings' );
+
+    // Add under Settings → Guest Order Assigner
+    // We pass the full URL as the $menu_slug, and omit the callback
+    add_options_page(
+        __( 'Guest Order Assigner Settings', 'guest-order-assigner' ), // Page title
+        __( 'Guest Order Assigner Settings', 'guest-order-assigner' ), // Menu label
+        'manage_options',                                             // Capability
+        $settings_action_url                                          // Menu slug = full URL
+        // no callback here
+    );
+}
+
+// Already have this elsewhere in your plugin:
+add_action( 'admin_action_goa_settings', 'goa_render_settings_page' );
+
+
+
+
