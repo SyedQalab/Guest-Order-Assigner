@@ -199,7 +199,3 @@ function goa_register_settings_page() {
 
 // Already have this elsewhere in your plugin:
 add_action( 'admin_action_goa_settings', 'goa_render_settings_page' );
-
-
-
-
