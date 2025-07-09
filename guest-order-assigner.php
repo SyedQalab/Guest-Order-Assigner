@@ -185,7 +185,7 @@ add_filter( 'plugin_row_meta', function( array $links, string $file ) {
 add_action( 'admin_action_goa_settings', 'goa_render_settings_page' );
 function goa_render_settings_page() {
     // Permission check
-    if ( ! current_user_can( 'manage_woocommerce' ) ) {
+    if ( ! current_user_can( 'manage_options' ) ) {
         wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'guest-order-assigner' ) );
     }
 
