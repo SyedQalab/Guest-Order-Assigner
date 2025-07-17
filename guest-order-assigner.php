@@ -3,7 +3,7 @@
  * Plugin Name:       Guest Order Assigner
  * Plugin URI:        https://www.kazverse.com/plugins/guest-order-assigner
  * Description:       Automatically attaches WooCommerce guest orders to matching user accounts by billing email.
- * Version:           1.0.3
+ * Version:           1.0.3.1
  * Author:            Kazmi
  * Author URI:        https://www.kazverse.com
  * Text Domain:       guest-order-assigner
@@ -43,6 +43,10 @@ function goa_enqueue_admin_assets( string $hook_suffix ) {
  * @param WP_User  $user
  */
 function goa_attach_if_guest( WC_Order $order, WP_User $user ): void {
+    if ( ! $user instanceof WP_User ) {
+        return;
+    }
+
     // Only run on pure guest orders
     if ( 0 !== (int) $order->get_user_id() ) {
         return;
@@ -155,7 +159,9 @@ function goa_run_on_activation() {
         // If we find a WP user with that billing email, attach them
         $user = get_user_by( 'email', $email );
 
-        goa_attach_if_guest( $order, $user );
+        if ( $user instanceof WP_User ) {
+            goa_attach_if_guest( $order, $user );
+        }
     }
 
 }
