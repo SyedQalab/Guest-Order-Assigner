@@ -71,6 +71,9 @@ function goa_attach_if_guest( WC_Order $order, WP_User $user ): void {
  * Back-fill all past guest orders sharing this user’s billing email.
  */
 function goa_backfill_guest_orders( WP_User $user ): void {
+    if ( ! $user instanceof WP_User ) return;
+    if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_get_orders' ) ) return;
+    
     $email = sanitize_email( $user->user_email );
     if ( ! $email ) {
         return;
@@ -97,6 +100,7 @@ function goa_backfill_guest_orders( WP_User $user ): void {
 // Fires for every new order, including guests
 add_action( 'woocommerce_new_order', 'attach_guest_order_to_existing_user', 20, 1 );
 function attach_guest_order_to_existing_user( int $order_id ): void {
+    if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_get_order' ) ) return;
 
     $order = wc_get_order( $order_id );
     if ( ! $order || (int) $order->get_user_id() !== 0 ) {
@@ -130,9 +134,9 @@ add_action( 'woocommerce_created_customer', function ( $customer_id ) {
  * And again on any user login—just in case.
  */
 add_action( 'wp_login', function ( $login, $user ) {
-    if ( $user instanceof WP_User ) {
-        goa_backfill_guest_orders( $user );
-    }
+    if ( ! $user instanceof WP_User ) return;
+    if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'wc_get_orders' ) ) return;
+    goa_backfill_guest_orders( $user );
 }, 20, 2 );
 
 /**
