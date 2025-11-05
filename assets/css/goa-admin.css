@@ -288,3 +288,42 @@
   background: linear-gradient(90deg, #2271b1, transparent);
   opacity: 0.6;
 }
+
+/* Add to assets/css/goa-admin.css */
+
+/* Promo Card */
+.goa-promo-card {
+  background: #f0f8ff;
+  border: 1px solid #d0e8ff;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.goa-promo-icon {
+  font-size: 40px;
+  margin-right: 20px;
+}
+
+.goa-promo-text h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.goa-promo-text p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.goa-promo-text a {
+  color: #007cba;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.goa-promo-text a:hover {
+  text-decoration: underline;
+}
