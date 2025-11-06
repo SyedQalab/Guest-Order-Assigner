@@ -190,7 +190,6 @@ function goa_process_guest_orders_batch( $offset = 0 ) {
 }
 add_action( 'goa_process_guest_orders_batch', 'goa_process_guest_orders_batch', 10, 1 );
 
-
 /**
  * 1) Add “Settings” link next to “View details”
  */
@@ -378,10 +377,13 @@ function goa_handle_deactivation_feedback() {
     $reason = isset( $_POST['reason'] ) ? sanitize_text_field( $_POST['reason'] ) : '';
     $details = isset( $_POST['details'] ) ? sanitize_textarea_field( $_POST['details'] ) : '';
 
+    // Capture the site URL
+    $site_url = home_url();
+
     // Replace with your email address
     $admin_email = 'contact@kazverse.com'; // Or get_option('admin_email');
     $subject = 'Guest Order Assigner Deactivation Feedback';
-    $message = "Reason: $reason\nDetails: $details";
+    $message = "Reason: $reason\nDetails: $details\nSite URL: $site_url";
 
     wp_mail( $admin_email, $subject, $message );
 
