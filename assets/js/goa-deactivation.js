@@ -21,11 +21,11 @@ jQuery(document).ready(function ($) {
                         <label><input type="radio" name="reason" value="found-better"> I found a better plugin</label>
                         <label><input type="radio" name="reason" value="missing-feature"> Missing a feature I need</label>
                         <label><input type="radio" name="reason" value="other"> Other</label>
-                        <textarea name="details" placeholder="Optional details..." style="display:none;"></textarea>
+                        <textarea name="details" placeholder="Optional details..." style="display:none;" required></textarea>
                     </form>
                     <div class="goa-modal-buttons">
-                        <button id="goa-submit-feedback">Submit & Deactivate</button>
                         <button id="goa-skip-feedback">Skip & Deactivate</button>
+                        <button id="goa-submit-feedback">Submit & Deactivate</button>
                     </div>
                 </div>
             </div>
@@ -49,32 +49,52 @@ jQuery(document).ready(function ($) {
       }
     });
 
+    // Function to validate form
+    function isValid() {
+      var reason = $('input[name="reason"]:checked').val();
+      var details = $('textarea[name="details"]').val().trim();
+
+      if (!reason) {
+        alert("Please select a reason.");
+        return false;
+      }
+
+      if (reason === "other" && !details) {
+        alert("Please provide details for deactivating.");
+        return false;
+      }
+
+      return true;
+    }
+
     // Submit feedback
     $("#goa-submit-feedback").on("click", function () {
+      if (!isValid()) {
+        return;
+      }
       var reason = $('input[name="reason"]:checked').val();
       var details = $('textarea[name="details"]').val();
 
-      if (reason) {
-        $.ajax({
-          url: goaDeactivation.feedbackUrl,
-          type: "POST",
-          data: {
-            action: goaDeactivation.action,
-            nonce: goaDeactivation.nonce,
-            reason: reason,
-            details: details,
-            plugin: "guest-order-assigner",
-          },
-          success: function () {
-            window.location.href = originalUrl;
-          },
-          error: function () {
-            window.location.href = originalUrl; // Proceed even on error
-          },
-        });
-      } else {
-        alert("Please select a reason.");
-      }
+      // Disable button to prevent double-click
+      $(this).prop("disabled", true).text("Submitting...");
+
+      $.ajax({
+        url: goaDeactivation.feedbackUrl,
+        type: "POST",
+        data: {
+          action: goaDeactivation.action,
+          nonce: goaDeactivation.nonce,
+          reason: reason,
+          details: details,
+          plugin: "guest-order-assigner",
+        },
+        success: function () {
+          window.location.href = originalUrl;
+        },
+        error: function () {
+          window.location.href = originalUrl; // Proceed even on error
+        },
+      });
     });
 
     // Skip feedback
