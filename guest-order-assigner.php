@@ -385,7 +385,12 @@ function goa_handle_deactivation_feedback() {
     $subject = 'Guest Order Assigner Deactivation Feedback';
     $message = "Reason: $reason\nDetails: $details\nSite URL: $site_url";
 
-    wp_mail( $admin_email, $subject, $message );
+    // Add custom headers to change the From name (and optionally the From email)
+    $headers = array(
+        'From: Guest Order Assigner <guestorder@kazverse.com>'
+    );
+
+    wp_mail( $admin_email, $subject, $message, $headers );
 
     wp_send_json_success();
 }
