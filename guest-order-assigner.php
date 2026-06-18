@@ -3,7 +3,7 @@
  * Plugin Name:       Guest Order Assigner
  * Plugin URI:        https://www.kazverse.com/plugins/guest-order-assigner
  * Description:       Automatically attaches WooCommerce guest orders to matching user accounts by billing email.
- * Version:           1.0.3.3
+ * Version:           1.0.3.6
  * Author:            Kazmi
  * Author URI:        https://www.kazverse.com
  * Text Domain:       guest-order-assigner
@@ -249,6 +249,7 @@ function goa_render_settings_page() {
                 </div>
 
                 <!-- Promo Card -->
+                <?php if ( get_option( 'goa_promo_notice_dismissed' ) !== '1' ) : ?>
                 <div class="goa-promo-card">
                     <div class="goa-promo-icon">
                         🚀
@@ -258,6 +259,7 @@ function goa_render_settings_page() {
                         <p><?php esc_html_e( 'Hire expert WordPress designers and developers from ', 'guest-order-assigner' ); ?><a href="https://www.kazverse.com" target="_blank"><?php esc_html_e( 'Kazverse', 'guest-order-assigner' ); ?></a><?php esc_html_e( ' for your next project.', 'guest-order-assigner' ); ?></p>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Features Grid -->
                 <div class="goa-features-grid">
@@ -332,11 +334,16 @@ add_action( 'admin_action_goa_settings', 'goa_render_settings_page' );
 define( 'GOA_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
- * Enqueue deactivation feedback scripts and styles on the plugins page.
+ * Enqueue deactivation feedback scripts and styles on screens that show GOA notices.
  */
 add_action( 'admin_enqueue_scripts', 'goa_enqueue_deactivation_assets' );
 function goa_enqueue_deactivation_assets( $hook ) {
-    if ( 'plugins.php' !== $hook ) {
+    $screen = get_current_screen();
+    if ( ! $screen ) {
+        return;
+    }
+
+    if ( ! in_array( $screen->id, [ 'dashboard', 'plugins', 'toplevel_page_woocommerce' ] ) ) {
         return;
     }
 
@@ -353,6 +360,7 @@ function goa_enqueue_deactivation_assets( $hook ) {
     wp_localize_script( 'goa-deactivation-js', 'goaDeactivation', [
         'nonce'       => wp_create_nonce( 'goa_deactivation_feedback' ),
         'deactivationNonce' => wp_create_nonce( 'goa_promo_dismiss' ),
+        'goaPromo' => ['promoNonce' => wp_create_nonce('goa_promo_dismiss'),'dismissAction'=>'goa_dismiss_promo_notice','ajaxUrl'=>admin_url('admin-ajax.php')],
         'pluginSlug'  => GOA_PLUGIN_BASENAME,
         'feedbackUrl' => admin_url( 'admin-ajax.php' ),
         'action'      => 'goa_deactivation_feedback',
@@ -398,15 +406,18 @@ function goa_handle_deactivation_feedback() {
 /**
  * Set option on activation to show promo notice (if not already dismissed).
  */
-/**
- * Set option on activation to show promo notice (if not already dismissed).
- */
 function goa_set_promo_notice_on_activation() {
-    if ( get_option( 'goa_promo_notice_dismissed' ) !== '1' ) {
-        update_option( 'goa_promo_notice_dismissed', '0' ); // '0' means show
-    }
+    if ( false === get_option('goa_promo_notice_dismissed', false) ) {
+        add_option('goa_promo_notice_dismissed','0');
+      }
 }
 register_activation_hook( __FILE__, 'goa_set_promo_notice_on_activation' );
+
+register_deactivation_hook( __FILE__, 'goa_reset_promo_notice' );
+
+function goa_reset_promo_notice() {
+    update_option( 'goa_promo_notice_dismissed', '0' );
+}
 
 /**
  * Display dismissible admin notice for promo.
