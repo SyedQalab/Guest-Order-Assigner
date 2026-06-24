@@ -3,7 +3,7 @@
  * Plugin Name:       Guest Order Assigner
  * Plugin URI:        https://www.kazverse.com/plugins/guest-order-assigner
  * Description:       Automatically attaches WooCommerce guest orders to matching user accounts by billing email.
- * Version:           1.0.3.6
+ * Version:           1.0.3.7
  * Author:            Kazmi
  * Author URI:        https://www.kazverse.com
  * Text Domain:       guest-order-assigner
@@ -28,7 +28,7 @@ function goa_enqueue_admin_assets( string $hook_suffix ) {
             'goa-admin-css',
             plugin_dir_url( __FILE__ ) . 'assets/css/goa-admin.css',
             [],    // no dependencies
-            '1.0.0'
+            '1.0.3.7'
         );
     }
 }
@@ -352,7 +352,7 @@ function goa_enqueue_deactivation_assets( $hook ) {
         'goa-deactivation-js',
         plugin_dir_url( __FILE__ ) . 'assets/js/goa-deactivation.js',
         [ 'jquery' ], // Depends on jQuery
-        '1.0.0',
+        '1.0.3.7',
         true
     );
 
@@ -371,7 +371,7 @@ function goa_enqueue_deactivation_assets( $hook ) {
         'goa-deactivation-css',
         plugin_dir_url( __FILE__ ) . 'assets/css/goa-deactivation.css',
         [],
-        '1.0.0'
+        '1.0.3.7'
     );
 }
 
